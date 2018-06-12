@@ -1,3 +1,4 @@
+const path = require('path')
 const Generator = require('yeoman-generator')
 const { exec } = require('child_process')
 
@@ -39,32 +40,35 @@ class App extends Generator {
         name: 'name',
         message: 'Entre com o nome do projeto',
         default: this.options.appname
-      }, {
-        type: 'input',
-        name: 'url',
-        message: 'Entre com url do template base:',
-        default: this.options.url
-      }, {
-        type: 'confirm',
-        name: 'spa',
-        message: 'O projeto é um single page app (SPA)?',
-        default: true
       }
+      // {
+      //   type: 'input',
+      //   name: 'url',
+      //   message: 'Entre com url do template base:',
+      //   default: this.options.url
+      // },
+      // {
+      //   type: 'confirm',
+      //   name: 'spa',
+      //   message: 'O projeto é um single page app (SPA)?',
+      //   default: true
+      // }
     ]
 
     // Get and save infos
     this
       .prompt(pipeline)
-      .then(answers => {
-        this.log('appname:', answers.name)
-        this.log('url:', answers.url)
-        this.log('spa:', answers.spa)
+      .then(data => {
+        this.config.set('appname', data.name)
+        // this.config.set('url', data.url)
+        // this.config.set('spa', data.spa)
+
         done()
       })
   }
 
   configuring () {
-    this.log('\nconfiguring -> Saving configurations and configure the project (creating .editorconfig files and other metadata files)')
+    // this.log('\nconfiguring -> Saving configurations and configure the project (creating .editorconfig files and other metadata files)')
 
     // clone template
     this.config.set('dest', 'landing')
@@ -74,26 +78,32 @@ class App extends Generator {
     this.config.save()
 
     // TODO: Copy files from template
-    // this.c
+    this.fs.copy(
+      path.join(this.templatePath(), 'landing'),
+      this.destinationPath(this.config.get('appname'))
+    )
   }
 
   writing () {
     this.log('\nwriting -> Where you write the generator specific files (routes, controllers, etc)')
 
     // TODO: Edit files from template
+    // TODO:  - package.json
+    // TODO:  - package.json
   }
 
   install () {
     this.log('\ninstall -> Where installations are run (npm, bower)')
 
     // TODO: Install dependencies
+    // TODO: git init
   }
 
-  end () {
-    this.log('\nend -> Called last, cleanup, say good bye, etc')
+  // end () {
+  //   this.log('\nend -> Called last, cleanup, say good bye, etc')
 
-    // TODO: Remove template clonned
-  }
+  //   // TODO: Remove template clonned
+  // }
 
   // Others
 
