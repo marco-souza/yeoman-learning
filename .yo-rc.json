@@ -1,3 +1,5 @@
 {
-  "generator-bussola": {}
+  "generator-bussola": {
+    "dest": "landing"
+  }
 }

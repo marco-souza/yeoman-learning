@@ -1,4 +1,5 @@
 const Generator = require('yeoman-generator')
+const { exec } = require('child_process')
 
 /**
  * Base Generator
@@ -7,34 +8,34 @@ const Generator = require('yeoman-generator')
  * @extends {Generator}
  */
 class App extends Generator {
-  /**
-   * Creates an instance of App.
-   *
-   * @param {*} args
-   * @param {*} opts
-   * @memberof App
-   */
   constructor (args, opts) {
     super(args, opts)
 
-    // Set options
+    // Set arguments: appname, repoUrl
     this.argument('appname', {
       desc: 'Project Name',
-      // default: 'bussola-project'
+      default: 'my-project',
       required: false,
       type: String
     })
-
-    this.log(this.options.appname)
-
-    // Save configs
-    this.config.save()
+    this.argument('url', {
+      desc: 'Base Template (url)',
+      default: 'https://github.com/marco-souza/base-react-ts.git',
+      required: false,
+      type: String
+    })
   }
 
   /** Lifecycle Yeoman **/
 
   initializing () {
-    // this.log('\ninitializing -> Your initialization methods (checking current project state, getting configs, etc)')
+
+    // clone template
+    this.config.set('dest', 'landing')
+    this._asyncLoadTemplate(this.templatePath())
+
+    // Save configs
+    this.config.save()
   }
 
   prompting () {
@@ -44,6 +45,11 @@ class App extends Generator {
         name: 'name',
         message: 'Entre com o nome do projeto',
         default: this.options.appname
+      }, {
+        type: 'input',
+        name: 'url',
+        message: 'Entre com url do template base:',
+        default: this.options.url
       }, {
         type: 'confirm',
         name: 'spa',
@@ -56,25 +62,34 @@ class App extends Generator {
     this
       .prompt(pipeline)
       .then(answers => {
-        this.log('app name', answers.name)
-        this.log('spa', answers.spa)
+        this.log('appname:', answers.name)
+        this.log('url:', answers.url)
+        this.log('spa:', answers.spa)
       })
   }
 
   configuring () {
     // this.log('\nconfiguring -> Saving configurations and configure the project (creating .editorconfig files and other metadata files)')
+
+    // TODO: Copy files from template
   }
 
   writing () {
     // this.log('\nwriting -> Where you write the generator specific files (routes, controllers, etc)')
+
+    // TODO: Edit files from template
   }
 
   install () {
     // this.log('\ninstall -> Where installations are run (npm, bower)')
+
+    // TODO: Install dependencies
   }
 
   end () {
     // this.log('\nend -> Called last, cleanup, say good bye, etc')
+
+    // TODO: Remove template clonned
   }
 
   // Others
@@ -87,22 +102,33 @@ class App extends Generator {
     // this.log('\nconflicts -> Where conflicts are handled (used internally)')
   }
 
-  asyncTest () {
-    return new Promise(
-      (resolve, reject) => {
-        setTimeout(() => {
-          this.log('\n\nXOXOXOXO\n\n')
-          resolve(123)
-        }, 2000)
-      })
-      .then(this.log)
-
-    // const done = this.async()
-    // return setTimeout(() => {
-    //   this.log('\n\nXOXOXOXO\n\n')
-    //   done()
-    // }, 2000)
+  _asyncLoadTemplate (cwd) {
+    const done = this.async()
+    const opts = { cwd }
+    const folderName = this.config.get('dest')
+    exec(
+      `if [ ! -e ${folderName} ]; then git clone ${this.options.url} -b landing ${folderName}; fi `,
+      opts,
+      (err, stdout, stderr) => done(err)
+    )
   }
+
+  // asyncTest () {
+  //   return new Promise(
+  //     (resolve, reject) => {
+  //       setTimeout(() => {
+  //         this.log('\n\nXOXOXOXO\n\n')
+  //         resolve(123)
+  //       }, 2000)
+  //     })
+  //     .then(this.log)
+
+  //   // const done = this.async()
+  //   // return setTimeout(() => {
+  //   //   this.log('\n\nXOXOXOXO\n\n')
+  //   //   done()
+  //   // }, 2000)
+  // }
 }
 
 module.exports = App
