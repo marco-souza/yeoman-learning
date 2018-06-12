@@ -1,12 +1,6 @@
 const Generator = require('yeoman-generator')
 const { exec } = require('child_process')
 
-/**
- * Base Generator
- *
- * @class App
- * @extends {Generator}
- */
 class App extends Generator {
   constructor (args, opts) {
     super(args, opts)
