@@ -76,17 +76,17 @@ class App extends Generator {
       this.destinationRoot()
     )
 
-    // Copy .gitignore
-    this.fs.copy(
-      this.templatePath('landing/.gitignore'),
-      this.destinationPath('.gitignore')
-    )
-
-    // Copy .babelrc
-    this.fs.copy(
-      this.templatePath('landing/.babelrc'),
-      this.destinationPath('.babelrc')
-    )
+    // Copy hidden files
+    const hiddenFiles = [
+      'gitignore',
+      'babelrc'
+    ]
+    hiddenFiles.map(item => {
+      this.fs.copy(
+        this.templatePath(`landing/.${item}`),
+        this.destinationPath(`.${item}`)
+      )
+    })
   }
 
   writing () {
