@@ -1,8 +1,18 @@
 {
-  "name": "bussola-generator",
+  "name": "generator-bussola",
   "version": "1.0.0",
   "description": "A Yo generator for projects at Bussola do Investidor",
   "main": "index.js",
+  "files": [
+    "generators"
+  ],
+  "keywords": [
+    "yeoman-generator",
+    "generator-bussola"
+  ],
   "author": "Marco Antônio <ma.souza.junior@gmail.com>",
-  "license": ""
+  "license": "MIT",
+  "dependencies": {
+    "yeoman-generator": "^2.0.5"
+  }
 }
