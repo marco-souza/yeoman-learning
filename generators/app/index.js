@@ -35,6 +35,7 @@ class App extends Generator {
     if (this.options.appname) {
       // Define destination
       this.destinationRoot(this.options.appname)
+      this.config.set('appname', this.options.appname)
       return
     }
 
@@ -55,6 +56,7 @@ class App extends Generator {
       .then(data => {
         // Define destination
         this.destinationRoot(data.name)
+        this.config.set('appname', data.name)
 
         done()
       })
@@ -90,10 +92,15 @@ class App extends Generator {
   }
 
   writing () {
-    this.log('\nwriting -> Where you write the generator specific files (routes, controllers, etc)')
+    const pkgJson = require(this.templatePath('landing/package.json'))
 
-    // TODO: Edit files from template
-    // TODO:  - package.json
+    this.fs.extendJSON(this.destinationPath('package.json'), {
+      ...pkgJson,
+      name: this.config.get('appname'),
+      version: '1.0.0',
+      description: '',
+      author: ''
+    })
   }
 
   install () {
@@ -105,12 +112,6 @@ class App extends Generator {
         bower: false
       })
       .then(() => this._gitInit())
-  }
-
-  end () {
-    // this.log('\nend -> Called last, cleanup, say good bye, etc')
-
-    // TODO: Remove template clonned
   }
 
   // Private functions
@@ -130,7 +131,7 @@ class App extends Generator {
   _gitInit () {
     const done = this.async()
     const cmd = `
-      git init && git add . && git commit -m "Initial Commit"
+      git init && git add . && git commit -m 'Initial Commit'
     `
 
     exec(
