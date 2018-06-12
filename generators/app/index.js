@@ -50,7 +50,7 @@ class App extends Generator {
       }
     ]
 
-    // Get and save infos
+    // Get and save prompt's infos
     this
       .prompt(pipeline)
       .then(data => {
@@ -63,14 +63,8 @@ class App extends Generator {
   }
 
   configuring () {
-    // this.log('\nconfiguring -> Saving configurations and configure the project (creating .editorconfig files and other metadata files)')
-
     // clone template
-    this.config.set('dest', 'landing')
-    this._asyncLoadTemplate(this.templatePath())
-
-    // Save configs
-    this.config.save()
+    this._loadTemplate('landing')
 
     // Copy files from template
     this.fs.copy(
@@ -79,21 +73,16 @@ class App extends Generator {
     )
 
     // Copy hidden files
-    const hiddenFiles = [
+    this._loadHiddenFiles([
       'gitignore',
       'babelrc'
-    ]
-    hiddenFiles.map(item => {
-      this.fs.copy(
-        this.templatePath(`landing/.${item}`),
-        this.destinationPath(`.${item}`)
-      )
-    })
+    ])
   }
 
   writing () {
     const pkgJson = require(this.templatePath('landing/package.json'))
 
+    // overwrite package.json
     this.fs.extendJSON(this.destinationPath('package.json'), {
       ...pkgJson,
       name: this.config.get('appname'),
@@ -116,15 +105,19 @@ class App extends Generator {
 
   // Private functions
 
-  _asyncLoadTemplate (cwd) {
+  _loadTemplate (folder) {
     const done = this.async()
-    const opts = { cwd }
-    const folderName = this.config.get('dest')
+    const opts = {
+      cwd: this.templatePath()
+    }
+
+    // Clone if template isn't there
     const cmd = `
-    if [ ! -e ${this.templatePath(folderName)} ]; then
-      git clone ${this.options.url} -b landing ${folderName};
+    if [ ! -e ${folder} ]; then
+      git clone ${this.options.url} -b landing ${folder};
     fi`
 
+    this.config.set('dest', folder)
     exec(cmd, opts, (err, stdout, stderr) => done(err))
   }
 
@@ -139,6 +132,15 @@ class App extends Generator {
       { cwd: this.destinationPath() },
       (err, stdout, stderr) => done(err)
     )
+  }
+
+  _loadHiddenFiles (list) {
+    list.map(item => {
+      this.fs.copy(
+        this.templatePath(`landing/.${item}`),
+        this.destinationPath(`.${item}`)
+      )
+    })
   }
 }
 
