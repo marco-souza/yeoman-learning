@@ -1,4 +1,3 @@
-const path = require('path')
 const Generator = require('yeoman-generator')
 const { exec } = require('child_process')
 
@@ -15,7 +14,6 @@ class App extends Generator {
     // Set arguments: appname, repoUrl
     this.argument('appname', {
       desc: 'Project Name',
-      default: 'my-project',
       required: false,
       type: String
     })
@@ -33,35 +31,30 @@ class App extends Generator {
   }
 
   prompting () {
+    // If already have a name, go foward
+    if (this.options.appname) {
+      // Define destination
+      this.destinationRoot(this.options.appname)
+      return
+    }
+
     const done = this.async()
     const pipeline = [
       {
         type: 'input',
         name: 'name',
         message: 'Entre com o nome do projeto',
-        default: this.options.appname
+        required: true,
+        default: 'my-project'
       }
-      // {
-      //   type: 'input',
-      //   name: 'url',
-      //   message: 'Entre com url do template base:',
-      //   default: this.options.url
-      // },
-      // {
-      //   type: 'confirm',
-      //   name: 'spa',
-      //   message: 'O projeto é um single page app (SPA)?',
-      //   default: true
-      // }
     ]
 
     // Get and save infos
     this
       .prompt(pipeline)
       .then(data => {
-        this.config.set('appname', data.name)
-        // this.config.set('url', data.url)
-        // this.config.set('spa', data.spa)
+        // Define destination
+        this.destinationRoot(data.name)
 
         done()
       })
@@ -77,10 +70,22 @@ class App extends Generator {
     // Save configs
     this.config.save()
 
-    // TODO: Copy files from template
+    // Copy files from template
     this.fs.copy(
-      path.join(this.templatePath(), 'landing'),
-      this.destinationPath(this.config.get('appname'))
+      this.templatePath('landing'),
+      this.destinationRoot()
+    )
+
+    // Copy .gitignore
+    this.fs.copy(
+      this.templatePath('landing/.gitignore'),
+      this.destinationPath('.gitignore')
+    )
+
+    // Copy .babelrc
+    this.fs.copy(
+      this.templatePath('landing/.babelrc'),
+      this.destinationPath('.babelrc')
     )
   }
 
@@ -89,59 +94,51 @@ class App extends Generator {
 
     // TODO: Edit files from template
     // TODO:  - package.json
-    // TODO:  - package.json
   }
 
   install () {
-    this.log('\ninstall -> Where installations are run (npm, bower)')
-
-    // TODO: Install dependencies
-    // TODO: git init
+    // Install dependencies
+    this
+      .installDependencies({
+        yarn: true,
+        npm: false,
+        bower: false
+      })
+      .then(() => this._gitInit())
   }
 
-  // end () {
-  //   this.log('\nend -> Called last, cleanup, say good bye, etc')
+  end () {
+    // this.log('\nend -> Called last, cleanup, say good bye, etc')
 
-  //   // TODO: Remove template clonned
-  // }
-
-  // Others
-
-  // default () {
-  //   this.log('\ndefault ->  If the method name doesn’t match a priority, it will be pushed to this group.')
-  // }
-
-  conflicts () {
-    // this.log('\nconflicts -> Where conflicts are handled (used internally)')
+    // TODO: Remove template clonned
   }
+
+  // Private functions
 
   _asyncLoadTemplate (cwd) {
     const done = this.async()
     const opts = { cwd }
     const folderName = this.config.get('dest')
+    const cmd = `
+    if [ ! -e ${this.templatePath(folderName)} ]; then
+      git clone ${this.options.url} -b landing ${folderName};
+    fi`
+
+    exec(cmd, opts, (err, stdout, stderr) => done(err))
+  }
+
+  _gitInit () {
+    const done = this.async()
+    const cmd = `
+      git init && git add . && git commit -m "Initial Commit"
+    `
+
     exec(
-      `if [ ! -e ${folderName} ]; then git clone ${this.options.url} -b landing ${folderName}; fi `,
-      opts,
+      cmd,
+      { cwd: this.destinationPath() },
       (err, stdout, stderr) => done(err)
     )
   }
-
-  // asyncTest () {
-  //   return new Promise(
-  //     (resolve, reject) => {
-  //       setTimeout(() => {
-  //         this.log('\n\nXOXOXOXO\n\n')
-  //         resolve(123)
-  //       }, 2000)
-  //     })
-  //     .then(this.log)
-
-  //   // const done = this.async()
-  //   // return setTimeout(() => {
-  //   //   this.log('\n\nXOXOXOXO\n\n')
-  //   //   done()
-  //   // }, 2000)
-  // }
 }
 
 module.exports = App
