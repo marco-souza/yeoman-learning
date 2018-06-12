@@ -1,0 +1,8 @@
+{
+  "name": "bussola-generator",
+  "version": "1.0.0",
+  "description": "A Yo generator for projects at Bussola do Investidor",
+  "main": "index.js",
+  "author": "Marco Antônio <ma.souza.junior@gmail.com>",
+  "license": ""
+}
