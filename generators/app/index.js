@@ -29,16 +29,10 @@ class App extends Generator {
   /** Lifecycle Yeoman **/
 
   initializing () {
-
-    // clone template
-    this.config.set('dest', 'landing')
-    this._asyncLoadTemplate(this.templatePath())
-
-    // Save configs
-    this.config.save()
   }
 
   prompting () {
+    const done = this.async()
     const pipeline = [
       {
         type: 'input',
@@ -65,29 +59,38 @@ class App extends Generator {
         this.log('appname:', answers.name)
         this.log('url:', answers.url)
         this.log('spa:', answers.spa)
+        done()
       })
   }
 
   configuring () {
-    // this.log('\nconfiguring -> Saving configurations and configure the project (creating .editorconfig files and other metadata files)')
+    this.log('\nconfiguring -> Saving configurations and configure the project (creating .editorconfig files and other metadata files)')
+
+    // clone template
+    this.config.set('dest', 'landing')
+    this._asyncLoadTemplate(this.templatePath())
+
+    // Save configs
+    this.config.save()
 
     // TODO: Copy files from template
+    // this.c
   }
 
   writing () {
-    // this.log('\nwriting -> Where you write the generator specific files (routes, controllers, etc)')
+    this.log('\nwriting -> Where you write the generator specific files (routes, controllers, etc)')
 
     // TODO: Edit files from template
   }
 
   install () {
-    // this.log('\ninstall -> Where installations are run (npm, bower)')
+    this.log('\ninstall -> Where installations are run (npm, bower)')
 
     // TODO: Install dependencies
   }
 
   end () {
-    // this.log('\nend -> Called last, cleanup, say good bye, etc')
+    this.log('\nend -> Called last, cleanup, say good bye, etc')
 
     // TODO: Remove template clonned
   }
